@@ -111,6 +111,7 @@ func (h *WithdrawalsHandlers) UserWithdrawals(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(&withdrawals); err != nil {
