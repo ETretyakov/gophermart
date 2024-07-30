@@ -40,8 +40,8 @@ func (r *WithdrawlsRepoImpl) Create(
 		Update(balanceTName).
 		Set(
 			map[string]interface{}{
-				"current":   goqu.L(fmt.Sprintf("current - %d", model.Sum)),
-				"withdrawn": goqu.L(fmt.Sprintf("withdrawn + %d", model.Sum)),
+				"current":   goqu.L(fmt.Sprintf("current - %f", model.Sum)),
+				"withdrawn": goqu.L(fmt.Sprintf("withdrawn + %f", model.Sum)),
 			},
 		).
 		Where(goqu.C("user_id").Eq(model.UserID)).
