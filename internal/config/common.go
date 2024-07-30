@@ -30,7 +30,7 @@ type Security struct {
 
 type Config struct {
 	AppEnv                         Environment   `env:"APP_ENVIRONMENT" envDefault:"local" flag:"mode" flagShort:"m" flagDescription:"environment"`
-	HTTPAddress                    string        `env:"APP_ADDRESS" envDefault:"localhost:8081" flag:"address" flagShort:"a" flagDescription:"http address"`
+	HTTPAddress                    string        `env:"RUN_ADDRESS" envDefault:"localhost:8081" flag:"address" flagShort:"a" flagDescription:"http address"`
 	LogLevel                       string        `env:"LOG_LEVEL" envDefault:"info" flag:"log_level" flagShort:"l" flagDescription:"level for logging"`
 	LogFile                        string        `env:"LOG_FILE" envDefault:"logs/logs.jsonl" flag:"log_file"  flagShort:"w" flagDescription:"filepath for logs"`
 	Postgres                       Postgres      `envPrefix:"DATABASE_" flag:"pg_dsn" flagShort:"d" flagDescription:"database dsn"`
