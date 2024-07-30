@@ -61,20 +61,6 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 				),
 			)
 
-			_, err := p.ordersRepo.MarkAsProcessing(ctx, []string{order.ID})
-			if err != nil {
-				log.Error(ctx, "failed to mark processing order", err)
-			}
-
-			log.Info(
-				ctx,
-				fmt.Sprintf(
-					"preprocessing Worker №%d: marked order=%s as processing",
-					workerID,
-					order.Number,
-				),
-			)
-
 			orderRead, err := p.client.GetOrder(ctx, order.Number)
 			if err != nil {
 				log.Error(ctx, "failed to get order info", err)
@@ -90,7 +76,8 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 				),
 			)
 
-			if orderRead.Status == string(types.OrderProcessed) {
+			switch {
+			case orderRead.Status == string(types.OrderProcessed):
 				accrueRecord := models.AccrueRecord{
 					UserID: order.UserID,
 					Number: order.Number,
@@ -107,7 +94,21 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 						order.Number,
 					),
 				)
-			} else {
+			case orderRead.Status == string(types.OrderProcessing):
+				_, err := p.ordersRepo.MarkAsProcessing(ctx, []string{order.ID})
+				if err != nil {
+					log.Error(ctx, "failed to mark processing order", err)
+				}
+
+				log.Info(
+					ctx,
+					fmt.Sprintf(
+						"preprocessing Worker №%d: marked order=%s as processing",
+						workerID,
+						order.Number,
+					),
+				)
+			case orderRead.Status == string(types.OrderInvalid):
 				_, err := p.ordersRepo.MarkAsInvalid(ctx, []string{order.ID})
 				if err != nil {
 					log.Error(ctx, "failed to mark invalid order", err)
@@ -117,6 +118,15 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 					ctx,
 					fmt.Sprintf(
 						"preprocessing Worker №%d: order=%s marked as invalid",
+						workerID,
+						order.Number,
+					),
+				)
+			default:
+				log.Info(
+					ctx,
+					fmt.Sprintf(
+						"preprocessing Worker №%d: order=%s status unchanged",
 						workerID,
 						order.Number,
 					),
