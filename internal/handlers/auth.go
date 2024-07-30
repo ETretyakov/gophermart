@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"gophermart/internal/controllers"
+	"gophermart/internal/crypto"
 	"gophermart/internal/exceptions"
 	"gophermart/internal/log"
 	"gophermart/internal/repository"
@@ -54,6 +56,16 @@ func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token, err := crypto.JWT.GetToken(authUser.ID)
+	if err != nil {
+		log.Debug(ctx, fmt.Sprintf("failed to get token: %s", err))
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Authorization", "Bearer "+token)
+
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -83,11 +95,8 @@ func (h *AuthHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err = w.Write([]byte(token)); err != nil {
-		h.logger.Error(r, "failed to write token body", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Authorization", "Bearer "+token)
 
 	w.WriteHeader(http.StatusOK)
 }

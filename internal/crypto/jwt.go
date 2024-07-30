@@ -73,7 +73,7 @@ func (j JWTSigner) AuthToken(h http.Header) (*jwt.RegisteredClaims, error) {
 
 	userClaim, token, err := j.ExtractToken(rawToken)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to extract token")
+		return nil, exceptions.ErrNotAuthorised
 	}
 
 	if !token.Valid {
