@@ -16,34 +16,27 @@ func (s *Server) setupRoutes() *mux.Router {
 
 	// Auth handlers
 	m.HandleFunc("/api/user/register", s.auth.Register).
-		Methods(http.MethodPost).
-		Headers("Content-Type", "application/json")
+		Methods(http.MethodPost)
 	m.HandleFunc("/api/user/login", s.auth.Login).
-		Methods(http.MethodPost).
-		Headers("Content-Type", "application/json")
+		Methods(http.MethodPost)
 
 	//  Orders handlers
 	m.HandleFunc("/api/user/orders", s.orders.Create).
-		Methods(http.MethodPost).
-		Headers("Content-Type", "text/plain")
+		Methods(http.MethodPost)
 	m.HandleFunc("/api/user/orders", s.orders.UserOrders).
 		Methods(http.MethodGet)
 	m.HandleFunc("/api/user/orders/{number}", s.orders.UserOrderByNumber).
-		Methods(http.MethodGet).
-		Headers("Content-Type", "application/json")
+		Methods(http.MethodGet)
 
 	// Balance handlers
 	m.HandleFunc("/api/user/balance", s.balance.GetForUser).
-		Methods(http.MethodGet).
-		Headers("Content-Type", "application/json")
+		Methods(http.MethodGet)
 
 	// Withdrawals handlers
 	m.HandleFunc("/api/user/balance/withdraw", s.withdrawals.Create).
-		Methods(http.MethodPost).
-		Headers("Content-Type", "application/json")
+		Methods(http.MethodPost)
 	m.HandleFunc("/api/user/withdrawals", s.withdrawals.UserWithdrawals).
-		Methods(http.MethodGet).
-		Headers("Content-Type", "application/json")
+		Methods(http.MethodGet)
 
 	return m
 }
