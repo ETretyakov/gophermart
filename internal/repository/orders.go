@@ -52,7 +52,7 @@ func (r *OrdersRepoImpl) Create(
 
 func (r *OrdersRepoImpl) GetByNumber(
 	ctx context.Context,
-	orderNumber uint64,
+	orderNumber string,
 ) (*models.Order, error) {
 	qu, _, err := goqu.
 		Select(&models.Order{}).

@@ -110,7 +110,7 @@ func (c *AccrualHTTPClient) CreateOrder(
 
 func (c *AccrualHTTPClient) GetOrder(
 	ctx context.Context,
-	order uint64,
+	order string,
 ) (*OrderRead, error) {
 	var orderModel OrderRead
 

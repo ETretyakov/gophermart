@@ -16,7 +16,7 @@ type OrdersRepo interface {
 }
 
 type AccrualClient interface {
-	GetOrder(ctx context.Context, order uint64) (*accrual.OrderRead, error)
+	GetOrder(ctx context.Context, order string) (*accrual.OrderRead, error)
 }
 
 type AccrualPipelineImpl struct {
@@ -55,7 +55,7 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 			log.Info(
 				ctx,
 				fmt.Sprintf(
-					"preprocessing Worker №%d: got order=%d",
+					"preprocessing Worker №%d: got order=%s",
 					workerID,
 					order.Number,
 				),
@@ -69,7 +69,7 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 			log.Info(
 				ctx,
 				fmt.Sprintf(
-					"preprocessing Worker №%d: marked order=%d as processing",
+					"preprocessing Worker №%d: marked order=%s as processing",
 					workerID,
 					order.Number,
 				),
@@ -83,7 +83,7 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 			log.Info(
 				ctx,
 				fmt.Sprintf(
-					"preprocessing Worker №%d: retrieved status for order=%d - %+v",
+					"preprocessing Worker №%d: retrieved status for order=%s - %+v",
 					workerID,
 					order.Number,
 					orderRead,
@@ -102,7 +102,7 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 				log.Info(
 					ctx,
 					fmt.Sprintf(
-						"preprocessing Worker №%d: order=%d sent to processing",
+						"preprocessing Worker №%d: order=%s sent to processing",
 						workerID,
 						order.Number,
 					),
@@ -116,7 +116,7 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 				log.Info(
 					ctx,
 					fmt.Sprintf(
-						"preprocessing Worker №%d: order=%d marked as invalid",
+						"preprocessing Worker №%d: order=%s marked as invalid",
 						workerID,
 						order.Number,
 					),
@@ -138,7 +138,7 @@ func (p *AccrualPipelineImpl) processingWorker(ctx context.Context, workerID int
 			log.Info(
 				ctx,
 				fmt.Sprintf(
-					"processing Worker №%d: got order=%d",
+					"processing Worker №%d: got order=%s",
 					workerID,
 					accrueRecord.Number,
 				),
@@ -152,7 +152,7 @@ func (p *AccrualPipelineImpl) processingWorker(ctx context.Context, workerID int
 			log.Info(
 				ctx,
 				fmt.Sprintf(
-					"processing Worker №%d: order=%d processed",
+					"processing Worker №%d: order=%s processed",
 					workerID,
 					accrueRecord.Number,
 				),

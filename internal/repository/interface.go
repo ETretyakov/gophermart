@@ -50,7 +50,7 @@ type OrdersRepo interface {
 	MarkAsInvalid(ctx context.Context, orderIDs []string) (bool, error)
 	Accrue(ctx context.Context, record models.AccrueRecord) (bool, error)
 	UserOrders(ctx context.Context, userID string) (*[]models.Order, error)
-	GetByNumber(ctx context.Context, orderNumber uint64) (*models.Order, error)
+	GetByNumber(ctx context.Context, orderNumber string) (*models.Order, error)
 	GetUserOrderByNumber(ctx context.Context, userID string, orderNumber uint64) (*models.Order, error)
 }
 

@@ -3,7 +3,7 @@
 CREATE TABLE IF NOT EXISTS public.bll_orders (
 	order_id uuid DEFAULT gen_random_uuid() NOT NULL,
     user_id uuid NOT NULL,
-	number numeric NOT NULL,
+	number varchar NOT NULL,
     status varchar DEFAULT 'NEW' NOT NULL,
 	accrual numeric DEFAULT 0 NOT NULL,
 	uploaded_at timestamp without time zone DEFAULT current_timestamp NOT NULL,

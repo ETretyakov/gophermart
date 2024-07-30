@@ -3,7 +3,7 @@
 CREATE TABLE IF NOT EXISTS public.wdr_withdrawals (
 	withdrawal_id uuid DEFAULT gen_random_uuid() NOT NULL,
     user_id uuid NOT NULL,
-    "order" numeric NOT NULL,
+    "order" varchar NOT NULL,
 	sum numeric DEFAULT 0 NOT NULL,
 	processed_at timestamp without time zone DEFAULT current_timestamp NOT NULL,
 	CONSTRAINT wdr_withdrawals_pk PRIMARY KEY (withdrawal_id)

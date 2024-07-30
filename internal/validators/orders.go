@@ -45,11 +45,7 @@ func (v *OrdersValidatorImpl) ValidateOrderCreate(
 		return nil, exceptions.ErrWrongOrderNumber
 	}
 
-	orderNumber, err := strconv.ParseUint(rawOrderNumber, 10, 64)
-	if err != nil {
-		return nil, exceptions.ErrWrongOrderNumber
-	}
-	order := models.NewOrder(userID, orderNumber)
+	order := models.NewOrder(userID, rawOrderNumber)
 
 	return order, nil
 }
