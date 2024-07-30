@@ -12,7 +12,6 @@ func VerifyPassword(s string) bool {
 		properLength bool
 		number       bool
 		upper        bool
-		special      bool
 	)
 	for _, c := range s {
 		switch {
@@ -22,8 +21,6 @@ func VerifyPassword(s string) bool {
 		case unicode.IsUpper(c):
 			upper = true
 			chars++
-		case unicode.IsPunct(c) || unicode.IsSymbol(c):
-			special = true
 		case unicode.IsLetter(c) || c == ' ':
 			chars++
 		default:
@@ -31,5 +28,5 @@ func VerifyPassword(s string) bool {
 		}
 	}
 	properLength = chars >= DefaultPasswordLength
-	return number && upper && special && properLength
+	return number && upper && properLength
 }
