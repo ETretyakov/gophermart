@@ -118,7 +118,7 @@ func (c *AccrualHTTPClient) GetOrder(
 		SetContext(ctx).
 		SetResult(&orderModel)
 
-	resp, err := request.Get(fmt.Sprintf("%s/api/orders/%d", c.baseURL, order))
+	resp, err := request.Get(fmt.Sprintf("%s/api/orders/%s", c.baseURL, order))
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get order")
 	}
