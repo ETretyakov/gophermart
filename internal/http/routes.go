@@ -27,8 +27,7 @@ func (s *Server) setupRoutes() *mux.Router {
 		Methods(http.MethodPost).
 		Headers("Content-Type", "text/plain")
 	m.HandleFunc("/api/user/orders", s.orders.UserOrders).
-		Methods(http.MethodGet).
-		Headers("Content-Type", "application/json")
+		Methods(http.MethodGet)
 	m.HandleFunc("/api/user/orders/{number}", s.orders.UserOrderByNumber).
 		Methods(http.MethodGet).
 		Headers("Content-Type", "application/json")
