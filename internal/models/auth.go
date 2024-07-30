@@ -2,7 +2,6 @@ package models
 
 import (
 	"gophermart/internal/crypto"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -29,7 +28,7 @@ func NewAuthUser(
 
 	return &AuthUser{
 		ID:        uuid.NewString(),
-		Login:     strings.ToLower(login),
+		Login:     login,
 		Password:  hashedPassword,
 		CreatedAt: time.Now().UTC().Format(time.RFC3339),
 		UpdatedAt: time.Now().UTC().Format(time.RFC3339),
