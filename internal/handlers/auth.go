@@ -50,12 +50,6 @@ func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(&user); err != nil {
-		h.logger.Error(r, "failed to encode response json", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	token, err := crypto.JWT.GetToken(authUser.ID)
 	if err != nil {
 		log.Debug(ctx, fmt.Sprintf("failed to get token: %s", err))
@@ -67,6 +61,12 @@ func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Authorization", "Bearer "+token)
 
 	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(&user); err != nil {
+		h.logger.Error(r, "failed to encode response json", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *AuthHandlers) Login(w http.ResponseWriter, r *http.Request) {

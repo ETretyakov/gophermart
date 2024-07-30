@@ -44,6 +44,8 @@ func (h *BalanceHandlers) GetForUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
+
 	balance, err := h.controller.GetForUser(ctx, userClaims.Subject)
 	if err != nil {
 		h.logger.Error(r, "failed to get user balance", err)
@@ -60,6 +62,4 @@ func (h *BalanceHandlers) GetForUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
 }
