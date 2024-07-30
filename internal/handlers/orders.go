@@ -104,6 +104,7 @@ func (h *OrdersHandlers) UserOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(&orders); err != nil {
@@ -149,6 +150,7 @@ func (h *OrdersHandlers) UserOrderByNumber(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(&order); err != nil {
