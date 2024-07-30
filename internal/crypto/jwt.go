@@ -44,6 +44,9 @@ func (j JWTSigner) GetToken(userID string) (string, error) {
 
 func (j JWTSigner) ExtractToken(rawToken string) (*jwt.RegisteredClaims, *jwt.Token, error) {
 	splitToken := strings.Split(rawToken, "Bearer ")
+	if len(splitToken) != 2 {
+		return nil, nil, errors.New("failed to parse bearer token")
+	}
 	rawToken = splitToken[1]
 
 	token, err := jwt.ParseWithClaims(
