@@ -3,9 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"gophermart/internal/controllers"
-	"gophermart/internal/crypto"
 	"gophermart/internal/exceptions"
 	"gophermart/internal/log"
+	"gophermart/internal/middlewares"
 	"gophermart/internal/repository"
 	"gophermart/internal/validators"
 	"net/http"
@@ -30,20 +30,14 @@ func NewOrdersHandlers(repos *repository.Repos) *OrdersHandlers {
 func (h *OrdersHandlers) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	userClaims, err := crypto.JWT.AuthToken(r.Header)
-	if err != nil {
-		switch {
-		case errors.Is(err, exceptions.ErrNotAuthorised):
-			h.logger.Debug(r, "failed to auth user: %s", err)
-			w.WriteHeader(http.StatusUnauthorized)
-		default:
-			h.logger.Error(r, "failed to auth user", err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+	rawUserID := ctx.Value(middlewares.UserIDKey)
+	userID, ok := rawUserID.(string)
+	if !ok || userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	orderIn, err := h.validator.ValidateOrderCreate(userClaims.Subject, r.Body)
+	orderIn, err := h.validator.ValidateOrderCreate(userID, r.Body)
 	if err != nil {
 		switch {
 		case errors.Is(err, exceptions.ErrWrongOrderNumber):
@@ -78,20 +72,14 @@ func (h *OrdersHandlers) Create(w http.ResponseWriter, r *http.Request) {
 func (h *OrdersHandlers) UserOrders(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	userClaims, err := crypto.JWT.AuthToken(r.Header)
-	if err != nil {
-		switch {
-		case errors.Is(err, exceptions.ErrNotAuthorised):
-			h.logger.Debug(r, "failed to auth user: %s", err)
-			w.WriteHeader(http.StatusUnauthorized)
-		default:
-			h.logger.Error(r, "failed to auth user", err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+	rawUserID := ctx.Value(middlewares.UserIDKey)
+	userID, ok := rawUserID.(string)
+	if !ok || userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	orders, err := h.controller.UserOrders(ctx, userClaims.Subject)
+	orders, err := h.controller.UserOrders(ctx, userID)
 	if err != nil {
 		h.logger.Error(r, "failed to get orders", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -117,16 +105,10 @@ func (h *OrdersHandlers) UserOrders(w http.ResponseWriter, r *http.Request) {
 func (h *OrdersHandlers) UserOrderByNumber(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	userClaims, err := crypto.JWT.AuthToken(r.Header)
-	if err != nil {
-		switch {
-		case errors.Is(err, exceptions.ErrNotAuthorised):
-			h.logger.Debug(r, "failed to auth user: %s", err)
-			w.WriteHeader(http.StatusUnauthorized)
-		default:
-			h.logger.Error(r, "failed to auth user", err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+	rawUserID := ctx.Value(middlewares.UserIDKey)
+	userID, ok := rawUserID.(string)
+	if !ok || userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
@@ -137,7 +119,7 @@ func (h *OrdersHandlers) UserOrderByNumber(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	order, err := h.controller.GetUserOrderByNumber(ctx, userClaims.Subject, *orderNumber)
+	order, err := h.controller.GetUserOrderByNumber(ctx, userID, *orderNumber)
 	if err != nil {
 		switch {
 		case errors.Is(err, exceptions.ErrOrderNotFound):

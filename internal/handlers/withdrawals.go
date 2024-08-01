@@ -3,9 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"gophermart/internal/controllers"
-	"gophermart/internal/crypto"
 	"gophermart/internal/exceptions"
 	"gophermart/internal/log"
+	"gophermart/internal/middlewares"
 	"gophermart/internal/repository"
 	"gophermart/internal/validators"
 	"net/http"
@@ -30,21 +30,15 @@ func NewWithdrawalsHandlers(repos *repository.Repos) *WithdrawalsHandlers {
 func (h *WithdrawalsHandlers) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	userClaims, err := crypto.JWT.AuthToken(r.Header)
-	if err != nil {
-		switch {
-		case errors.Is(err, exceptions.ErrNotAuthorised):
-			h.logger.Debug(r, "failed to auth user: %s", err)
-			w.WriteHeader(http.StatusUnauthorized)
-		default:
-			h.logger.Error(r, "failed to auth user", err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+	rawUserID := ctx.Value(middlewares.UserIDKey)
+	userID, ok := rawUserID.(string)
+	if !ok || userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	withdrawalIn, err := h.validator.ValidateOrderCreate(
-		userClaims.Subject,
+		userID,
 		r.Body,
 	)
 
@@ -85,20 +79,14 @@ func (h *WithdrawalsHandlers) Create(w http.ResponseWriter, r *http.Request) {
 func (h *WithdrawalsHandlers) UserWithdrawals(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	userClaims, err := crypto.JWT.AuthToken(r.Header)
-	if err != nil {
-		switch {
-		case errors.Is(err, exceptions.ErrNotAuthorised):
-			h.logger.Debug(r, "failed to auth user: %s", err)
-			w.WriteHeader(http.StatusUnauthorized)
-		default:
-			h.logger.Error(r, "failed to auth user", err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+	rawUserID := ctx.Value(middlewares.UserIDKey)
+	userID, ok := rawUserID.(string)
+	if !ok || userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	withdrawals, err := h.controller.UserWithdrawals(ctx, userClaims.Subject)
+	withdrawals, err := h.controller.UserWithdrawals(ctx, userID)
 	if err != nil {
 		h.logger.Error(r, "failed to get orders", err)
 		w.WriteHeader(http.StatusInternalServerError)

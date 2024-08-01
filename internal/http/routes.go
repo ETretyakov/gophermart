@@ -1,6 +1,7 @@
 package http
 
 import (
+	"gophermart/internal/middlewares"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -20,23 +21,29 @@ func (s *Server) setupRoutes() *mux.Router {
 	m.HandleFunc("/api/user/login", s.auth.Login).
 		Methods(http.MethodPost)
 
+	userAuth := m.PathPrefix("/api/user").Subrouter()
+
 	//  Orders handlers
-	m.HandleFunc("/api/user/orders", s.orders.Create).
+	userAuth.HandleFunc("/orders", s.orders.Create).
 		Methods(http.MethodPost)
-	m.HandleFunc("/api/user/orders", s.orders.UserOrders).
+	userAuth.HandleFunc("/orders", s.orders.UserOrders).
 		Methods(http.MethodGet)
-	m.HandleFunc("/api/user/orders/{number}", s.orders.UserOrderByNumber).
+	userAuth.HandleFunc("/orders/{number}", s.orders.UserOrderByNumber).
 		Methods(http.MethodGet)
 
 	// Balance handlers
-	m.HandleFunc("/api/user/balance", s.balance.GetForUser).
+	userAuth.HandleFunc("/balance", s.balance.GetForUser).
 		Methods(http.MethodGet)
 
 	// Withdrawals handlers
-	m.HandleFunc("/api/user/balance/withdraw", s.withdrawals.Create).
+	userAuth.HandleFunc("/balance/withdraw", s.withdrawals.Create).
 		Methods(http.MethodPost)
-	m.HandleFunc("/api/user/withdrawals", s.withdrawals.UserWithdrawals).
+	userAuth.HandleFunc("/withdrawals", s.withdrawals.UserWithdrawals).
 		Methods(http.MethodGet)
+
+	// Middlewares
+	userAuth.Use(middlewares.AuthorizationMiddleware)
+	m.Use(middlewares.GzipMiddleware)
 
 	return m
 }
