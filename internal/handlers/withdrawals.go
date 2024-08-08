@@ -67,13 +67,13 @@ func (h *WithdrawalsHandlers) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-
 	if err := json.NewEncoder(w).Encode(&withdrawal); err != nil {
 		h.logger.Error(r, "failed to encode response json", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *WithdrawalsHandlers) UserWithdrawals(w http.ResponseWriter, r *http.Request) {
@@ -100,11 +100,12 @@ func (h *WithdrawalsHandlers) UserWithdrawals(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(&withdrawals); err != nil {
 		h.logger.Error(r, "failed to encode response json", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 }

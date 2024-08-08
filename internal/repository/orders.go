@@ -80,7 +80,7 @@ func (r *OrdersRepoImpl) GetByNumber(
 func (r *OrdersRepoImpl) GetUserOrderByNumber(
 	ctx context.Context,
 	userID string,
-	orderNumber uint64,
+	orderNumber string,
 ) (*models.Order, error) {
 	qu, _, err := goqu.
 		Select(&models.Order{}).

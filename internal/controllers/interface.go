@@ -21,7 +21,7 @@ type AuthController interface {
 type OrdersController interface {
 	Create(ctx context.Context, schema *models.Order) (*models.Order, error)
 	UserOrders(ctx context.Context, userID string) (*[]models.Order, error)
-	GetUserOrderByNumber(ctx context.Context, userID string, orderNumber uint64) (*models.Order, error)
+	GetUserOrderByNumber(ctx context.Context, userID string, orderNumber string) (*models.Order, error)
 }
 
 type BalanceController interface {

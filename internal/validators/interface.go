@@ -13,7 +13,7 @@ type AuthValidator interface {
 
 type OrderValidator interface {
 	ValidateOrderCreate(userID string, body io.ReadCloser) (*models.Order, error)
-	ValidateOrderFromPath(r *http.Request) (*uint64, error)
+	ValidateOrderFromPath(r *http.Request) (string, error)
 }
 
 type BalanceValidator interface{}

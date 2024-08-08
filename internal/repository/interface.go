@@ -51,7 +51,7 @@ type OrdersRepo interface {
 	Accrue(ctx context.Context, record models.AccrueRecord) (bool, error)
 	UserOrders(ctx context.Context, userID string) (*[]models.Order, error)
 	GetByNumber(ctx context.Context, orderNumber string) (*models.Order, error)
-	GetUserOrderByNumber(ctx context.Context, userID string, orderNumber uint64) (*models.Order, error)
+	GetUserOrderByNumber(ctx context.Context, userID string, orderNumber string) (*models.Order, error)
 }
 
 func NewRepos(ctx context.Context, db *sqlx.DB) (*Repos, error) {

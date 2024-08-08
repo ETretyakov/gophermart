@@ -36,7 +36,6 @@ func (h *BalanceHandlers) GetForUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 
 	balance, err := h.controller.GetForUser(ctx, userID)
 	if err != nil {
@@ -54,4 +53,6 @@ func (h *BalanceHandlers) GetForUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 }

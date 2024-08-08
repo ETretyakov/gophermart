@@ -67,7 +67,7 @@ func (c *OrdersControllerImpl) UserOrders(
 func (c *OrdersControllerImpl) GetUserOrderByNumber(
 	ctx context.Context,
 	userID string,
-	orderNumber uint64,
+	orderNumber string,
 ) (*models.Order, error) {
 	order, err := c.repos.OrdersRepo.GetUserOrderByNumber(
 		ctx,

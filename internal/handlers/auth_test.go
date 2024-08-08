@@ -62,6 +62,7 @@ func (m *MockedAuthController) Login(
 }
 
 func TestAuthHandlers_Register(t *testing.T) {
+	crypto.InitJWTSigner("123321", 100*time.Second)
 	controller := &MockedAuthController{}
 
 	type fields struct {

@@ -7,7 +7,6 @@ import (
 	"gophermart/internal/models"
 	"io"
 	"net/http"
-	"strconv"
 
 	"github.com/ShiraazMoollatjie/goluhn"
 	"github.com/go-playground/validator/v10"
@@ -50,18 +49,17 @@ func (v *OrdersValidatorImpl) ValidateOrderCreate(
 	return order, nil
 }
 
-func (v *OrdersValidatorImpl) ValidateOrderFromPath(r *http.Request) (*uint64, error) {
+func (v *OrdersValidatorImpl) ValidateOrderFromPath(r *http.Request) (string, error) {
 	vars := mux.Vars(r)
 
-	rawNumber, ok := vars["number"]
+	number, ok := vars["number"]
 	if !ok {
-		return nil, errors.New("failed to retrieve number")
+		return "", errors.New("failed to retrieve number")
 	}
 
-	number, err := strconv.ParseUint(rawNumber, 10, 64)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse number")
+	if err := goluhn.Validate(number); err != nil {
+		return "", exceptions.ErrWrongOrderNumber
 	}
 
-	return &number, nil
+	return number, nil
 }

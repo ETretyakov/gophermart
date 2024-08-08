@@ -93,13 +93,14 @@ func (h *OrdersHandlers) UserOrders(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(&orders); err != nil {
 		h.logger.Error(r, "failed to encode response json", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *OrdersHandlers) UserOrderByNumber(w http.ResponseWriter, r *http.Request) {
@@ -119,7 +120,7 @@ func (h *OrdersHandlers) UserOrderByNumber(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	order, err := h.controller.GetUserOrderByNumber(ctx, userID, *orderNumber)
+	order, err := h.controller.GetUserOrderByNumber(ctx, userID, orderNumber)
 	if err != nil {
 		switch {
 		case errors.Is(err, exceptions.ErrOrderNotFound):
@@ -133,11 +134,12 @@ func (h *OrdersHandlers) UserOrderByNumber(w http.ResponseWriter, r *http.Reques
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(&order); err != nil {
 		h.logger.Error(r, "failed to encode response json", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 }
