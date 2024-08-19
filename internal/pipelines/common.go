@@ -12,6 +12,7 @@ var AccrualPipeline AccrualPipelineImpl
 func InitAccrualPipeline(
 	ctx context.Context,
 	accrualBaseURL string,
+	accrualWaitRetryAfter time.Duration,
 	accrualRetryCount int,
 	accrualRetryWaitTime time.Duration,
 	accrualRetryMaxWaitTime time.Duration,
@@ -24,6 +25,7 @@ func InitAccrualPipeline(
 		accrual.NewAccrualClient(
 			ctx,
 			accrualBaseURL,
+			accrualWaitRetryAfter,
 			accrualRetryCount,
 			accrualRetryWaitTime,
 			accrualRetryMaxWaitTime,

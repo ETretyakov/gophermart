@@ -36,9 +36,11 @@ type Config struct {
 	Postgres                       Postgres      `envPrefix:"DATABASE_" flag:"pg_dsn" flagShort:"d" flagDescription:"database dsn"`
 	Security                       Security      `envPrefix:"SECURITY_" flag:"jwt_secret_key" flagShort:"j" flagDescription:"jwt secret key"`
 	AccrualBaseURL                 string        `env:"ACCRUAL_SYSTEM_ADDRESS" envDefault:"localhost:8080" flag:"accrual_address" flagShort:"r" flagDescription:"accrual address"`
+	AccrualWaitRetryAfter          time.Duration `env:"ACCRUAL_WAIT_RETRY_AFTER" envDefault:"3600s"`
 	AccrualRetryCount              int           `env:"ACCRUAL_RETRY_COUNT" envDefault:"3"`
 	AccrualRetryWaitTime           time.Duration `env:"ACCRUAL_RETRY_WAIT_TIME" envDefault:"1s"`
 	AccrualRetryMaxWaitTime        time.Duration `env:"ACCRUAL_RETRY_MAX_WAIT_TIME" envDefault:"10s"`
+	AccrualPeriodicInterval        time.Duration `env:"ACCRUAL_PERIODIC_INTERVAL" envDefault:"10s"`
 	AccrualPipelineBufferSize      int           `env:"ACCRUAL_PIPELINE_BUFFER_SIZE" envDefault:"10"`
 	AccrualPipelineNumberOfWorkers int           `env:"ACCRUAL_PIPELINE_NUMBER_OF_WORKERS" envDefault:"10"`
 }

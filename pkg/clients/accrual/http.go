@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gophermart/internal/log"
+	"net/http"
 	"strings"
 	"time"
 
@@ -12,13 +13,16 @@ import (
 )
 
 type AccrualHTTPClient struct {
-	client  *resty.Client
-	baseURL string
+	client            *resty.Client
+	baseURL           string
+	waitRetryAfter    bool
+	defaultRetryAfter time.Duration
 }
 
 func NewAccrualClient(
 	ctx context.Context,
 	baseURL string,
+	waitRetryAfter time.Duration,
 	retryCount int,
 	retryWaitTime time.Duration,
 	retryMaxWaitTime time.Duration,
@@ -28,8 +32,10 @@ func NewAccrualClient(
 	}
 
 	c := &AccrualHTTPClient{
-		client:  resty.New(),
-		baseURL: baseURL,
+		client:            resty.New(),
+		baseURL:           baseURL,
+		waitRetryAfter:    waitRetryAfter != 0,
+		defaultRetryAfter: waitRetryAfter,
 	}
 
 	c.client.
@@ -124,11 +130,22 @@ func (c *AccrualHTTPClient) GetOrder(
 	}
 
 	if resp.IsError() {
-		return nil, errors.Wrapf(
-			err,
-			"failed to get order: status=%s body=%s",
-			resp.Status(),
-			resp.Body(),
+		if resp.StatusCode() == http.StatusTooManyRequests && c.waitRetryAfter {
+			retryAfter := resp.Header().Get("Retry-After")
+			seconds, err := time.ParseDuration(retryAfter + "s")
+			if err != nil {
+				seconds = c.defaultRetryAfter
+			}
+			time.Sleep(seconds)
+			return nil, ErrTooManyRequests
+		}
+
+		return nil, errors.New(
+			fmt.Sprintf(
+				"failed to get order: status=%s body=%s",
+				resp.Status(),
+				resp.Body(),
+			),
 		)
 	}
 

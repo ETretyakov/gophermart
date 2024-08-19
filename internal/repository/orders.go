@@ -156,11 +156,36 @@ func (r *OrdersRepoImpl) MarkAsInvalid(
 	return status, nil
 }
 
+func (r *OrdersRepoImpl) GetProcessing(ctx context.Context) (*[]models.Order, error) {
+	qu, _, err := goqu.
+		Select(&models.Order{}).
+		From(ordersTName).
+		Where(
+			goqu.C("status").Eq(string(types.OrderProcessing)),
+		).
+		ToSQL()
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to build query")
+	}
+
+	var orders []models.Order
+	err = r.repos.DB.QueryRowxContext(ctx, qu).StructScan(&orders)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return &orders, nil
+		} else {
+			return nil, errors.Wrapf(err, "failed to execute query")
+		}
+	}
+
+	return &orders, nil
+}
+
 func (r *OrdersRepoImpl) Accrue(
 	ctx context.Context,
 	record models.AccrueRecord,
 ) (bool, error) {
-	_, err := r.repos.BalanceRepo.GetOrCreateForUser(ctx, record.UserID)
+	_, err := r.repos.BalanceRepo.GetForUser(ctx, record.UserID)
 	if err != nil {
 		return false, errors.Wrapf(err, "failed to get user balance")
 	}

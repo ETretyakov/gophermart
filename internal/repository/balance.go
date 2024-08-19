@@ -51,6 +51,29 @@ func (r *BalanceRepoImpl) GetOrCreateForUser(
 	return &balance, nil
 }
 
+func (r *BalanceRepoImpl) GetForUser(
+	ctx context.Context,
+	userID string,
+) (*models.Balance, error) {
+	qu, _, err := goqu.
+		Select(&models.Balance{}).
+		From(balanceTName).
+		Where(goqu.C("user_id").Eq(userID)).
+		Limit(1).
+		ToSQL()
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to build query")
+	}
+
+	var balance models.Balance
+	err = r.repos.DB.QueryRowxContext(ctx, qu).StructScan(&balance)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to execute query")
+	}
+
+	return &balance, nil
+}
+
 func (r *BalanceRepoImpl) Get(
 	ctx context.Context,
 	balanceID string,

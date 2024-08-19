@@ -34,6 +34,7 @@ type UsersRepo interface {
 
 type BalanceRepo interface {
 	GetOrCreateForUser(ctx context.Context, userID string) (*models.Balance, error)
+	GetForUser(ctx context.Context, userID string) (*models.Balance, error)
 	Get(ctx context.Context, balanceID string) (*models.Balance, error)
 	Create(ctx context.Context, model *models.Balance) (*models.Balance, error)
 	Update(ctx context.Context, model *models.Balance) (*models.Balance, error)
@@ -52,6 +53,7 @@ type OrdersRepo interface {
 	UserOrders(ctx context.Context, userID string) (*[]models.Order, error)
 	GetByNumber(ctx context.Context, orderNumber string) (*models.Order, error)
 	GetUserOrderByNumber(ctx context.Context, userID string, orderNumber string) (*models.Order, error)
+	GetProcessing(ctx context.Context) (*[]models.Order, error)
 }
 
 func NewRepos(ctx context.Context, db *sqlx.DB) (*Repos, error) {

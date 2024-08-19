@@ -7,12 +7,15 @@ import (
 	"gophermart/internal/models"
 	"gophermart/internal/types"
 	"gophermart/pkg/clients/accrual"
+	"sync"
+	"time"
 )
 
 type OrdersRepo interface {
 	MarkAsProcessing(ctx context.Context, orderIDs []string) (bool, error)
 	MarkAsInvalid(ctx context.Context, orderIDs []string) (bool, error)
 	Accrue(ctx context.Context, record models.AccrueRecord) (bool, error)
+	GetProcessing(ctx context.Context) (*[]models.Order, error)
 }
 
 type AccrualClient interface {
@@ -46,7 +49,13 @@ func (p *AccrualPipelineImpl) RegisterOrder(order *models.Order) {
 	p.preprocessingCh <- *order
 }
 
-func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID int) {
+func (p *AccrualPipelineImpl) preprocessingWorker(
+	ctx context.Context,
+	workerID int,
+	wg *sync.WaitGroup,
+) {
+	defer wg.Done()
+
 	log.Info(ctx, fmt.Sprintf("starting preprocessing Worker №%d", workerID))
 
 	for {
@@ -76,8 +85,8 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 				),
 			)
 
-			switch {
-			case orderRead.Status == string(types.OrderProcessed):
+			switch types.OrderStatus(orderRead.Status) {
+			case types.OrderProcessed:
 				accrueRecord := models.AccrueRecord{
 					UserID: order.UserID,
 					Number: order.Number,
@@ -94,7 +103,7 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 						order.Number,
 					),
 				)
-			case orderRead.Status == string(types.OrderProcessing):
+			case types.OrderProcessing:
 				_, err := p.ordersRepo.MarkAsProcessing(ctx, []string{order.ID})
 				if err != nil {
 					log.Error(ctx, "failed to mark processing order", err)
@@ -108,7 +117,7 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 						order.Number,
 					),
 				)
-			case orderRead.Status == string(types.OrderInvalid):
+			case types.OrderInvalid:
 				_, err := p.ordersRepo.MarkAsInvalid(ctx, []string{order.ID})
 				if err != nil {
 					log.Error(ctx, "failed to mark invalid order", err)
@@ -139,7 +148,13 @@ func (p *AccrualPipelineImpl) preprocessingWorker(ctx context.Context, workerID 
 	}
 }
 
-func (p *AccrualPipelineImpl) processingWorker(ctx context.Context, workerID int) {
+func (p *AccrualPipelineImpl) processingWorker(
+	ctx context.Context,
+	workerID int,
+	wg *sync.WaitGroup,
+) {
+	defer wg.Done()
+
 	log.Info(ctx, fmt.Sprintf("starting processing Worker №%d", workerID))
 
 	for {
@@ -174,10 +189,51 @@ func (p *AccrualPipelineImpl) processingWorker(ctx context.Context, workerID int
 	}
 }
 
-func (p *AccrualPipelineImpl) Start(ctx context.Context) {
+func (p *AccrualPipelineImpl) periodicProcessingRetry(
+	ctx context.Context,
+	interval time.Duration,
+	wg *sync.WaitGroup,
+) {
+	defer wg.Done()
+
+	log.Info(ctx, "starting periodic job")
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			orders, err := p.ordersRepo.GetProcessing(ctx)
+			if err != nil {
+				log.Error(ctx, "failed to get processing orders", err)
+			}
+
+			for _, o := range *orders {
+				p.preprocessingCh <- o
+			}
+		case <-ctx.Done():
+			return
+		}
+	}
+}
+
+func (p *AccrualPipelineImpl) Start(
+	ctx context.Context,
+	retryInterval time.Duration,
+) {
+	wg := sync.WaitGroup{}
+
 	log.Info(ctx, fmt.Sprintf("Starting %d workers", p.numberOfWorkers))
 	for i := 1; i <= p.numberOfWorkers; i++ {
-		go p.preprocessingWorker(ctx, i)
-		go p.processingWorker(ctx, i)
+		wg.Add(2)
+
+		go p.preprocessingWorker(ctx, i, &wg)
+		go p.processingWorker(ctx, i, &wg)
 	}
+
+	wg.Add(1)
+	go p.periodicProcessingRetry(ctx, retryInterval, &wg)
+
+	wg.Wait()
 }

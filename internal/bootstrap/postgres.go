@@ -57,6 +57,8 @@ func InitDB(ctx context.Context, cfg *config.Postgres) (*sqlx.DB, error) {
 
 	go func() {
 		ticker := time.NewTicker(cfg.PingInterval)
+		defer ticker.Stop()
+
 		for {
 			select {
 			case <-ticker.C:

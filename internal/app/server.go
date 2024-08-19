@@ -46,6 +46,7 @@ func Run(ctx context.Context, cfg *config.Config) (err error) {
 	pipelines.InitAccrualPipeline(
 		ctx,
 		cfg.AccrualBaseURL,
+		cfg.AccrualWaitRetryAfter,
 		cfg.AccrualRetryCount,
 		cfg.AccrualRetryWaitTime,
 		cfg.AccrualRetryMaxWaitTime,
@@ -54,7 +55,7 @@ func Run(ctx context.Context, cfg *config.Config) (err error) {
 		cfg.AccrualPipelineNumberOfWorkers,
 	)
 
-	pipelines.AccrualPipeline.Start(ctx)
+	go pipelines.AccrualPipeline.Start(ctx, cfg.AccrualPeriodicInterval)
 
 	// Handlers bindings
 	healthHandlers := handlers.NewHealthHandlers(repos)

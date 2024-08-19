@@ -33,7 +33,7 @@ func (r *AuthRepoImpl) UserExists(
 
 	var userID string
 	err = r.repos.DB.QueryRowxContext(ctx, qu).Scan(&userID)
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
+	if err != nil {
 		return false, nil
 	}
 
