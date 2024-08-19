@@ -70,10 +70,6 @@ func (r *WithdrawlsRepoImpl) Create(
 	}
 
 	if balance.Current < 0 {
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to rollback transaction")
-		}
-
 		return nil, exceptions.ErrBalanceIsNegative
 	}
 
